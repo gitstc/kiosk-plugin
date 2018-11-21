@@ -37,8 +37,8 @@ public class StatusBarOverlay extends ViewGroup {
                 .getSystemService(Context.WINDOW_SERVICE));
 
         WindowManager.LayoutParams localLayoutParams = new WindowManager.LayoutParams();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.OREO) {
-            // only for gingerbread and newer versions
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            // only for OREO and newer versions
             localLayoutParams.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
         } else {
             localLayoutParams.type = WindowManager.LayoutParams.TYPE_SYSTEM_ERROR;
