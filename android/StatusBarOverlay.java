@@ -33,15 +33,19 @@ public class StatusBarOverlay extends ViewGroup {
     }
 
     static StatusBarOverlay create(Activity activity) {
-        WindowManager manager = ((WindowManager) activity
-                .getApplicationContext()
+        WindowManager manager = ((WindowManager) activity.getApplicationContext()
                 .getSystemService(Context.WINDOW_SERVICE));
 
         WindowManager.LayoutParams localLayoutParams = new WindowManager.LayoutParams();
-        localLayoutParams.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.OREO) {
+            // only for gingerbread and newer versions
+            localLayoutParams.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+        } else {
+            localLayoutParams.type = WindowManager.LayoutParams.TYPE_SYSTEM_ERROR;
+        }
         localLayoutParams.gravity = Gravity.TOP;
-        localLayoutParams.flags =
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | // Enable the notification to receive touch events
+        localLayoutParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | // Enable the notification to receive
+                                                                                  // touch events
                 WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | // Draw over status bar
                 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
 
@@ -55,14 +59,14 @@ public class StatusBarOverlay extends ViewGroup {
         System.out.println("Installing StatusBarOverlay");
         return view;
     }
-    
+
     static StatusBarOverlay createOrObtainPermission(Activity activity) {
         if (Build.VERSION.SDK_INT >= 23) { // added in API level 23
             try {
                 Method canDrawOverlays = Settings.class.getMethod("canDrawOverlays", Context.class);
-                if (! (Boolean)canDrawOverlays.invoke(null, activity)) {
-                    Intent intent = new Intent("android.settings.action.MANAGE_OVERLAY_PERMISSION", //Settings.ACTION_MANAGE_OVERLAY_PERMISSION
-                        Uri.parse("package:" + activity.getApplicationContext().getPackageName()));
+                if (!(Boolean) canDrawOverlays.invoke(null, activity)) {
+                    Intent intent = new Intent("android.settings.action.MANAGE_OVERLAY_PERMISSION", // Settings.ACTION_MANAGE_OVERLAY_PERMISSION
+                            Uri.parse("package:" + activity.getApplicationContext().getPackageName()));
                     activity.startActivityForResult(intent, OVERLAY_PERMISSION_REQ_CODE);
                     return null;
                 }
@@ -73,10 +77,9 @@ public class StatusBarOverlay extends ViewGroup {
         }
         return create(activity);
     }
-    
+
     void destroy(Activity activity) {
-        WindowManager manager = ((WindowManager) activity
-                .getApplicationContext()
+        WindowManager manager = ((WindowManager) activity.getApplicationContext()
                 .getSystemService(Context.WINDOW_SERVICE));
         manager.removeView(this);
         System.out.println("Removing StatusBarOverlay");
